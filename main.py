@@ -6,10 +6,16 @@ port = Serial("COM11", 9600)
 count = 0
 
 while True:
-    port.write(bytearray([count]))
-    count += 1
 
-    print count
+    tx = [count]
+
+    port.write(bytearray(tx))
+
+    rx = ord(port.read(1))
+
+    print "RX: " + str(rx) + " TX: " + str(tx)
+
+    count += 1
 
     if count > 255:
         count = 0
