@@ -8,7 +8,10 @@ import pygame
 from pygame.locals import *
 import os, sys
 import threading
-from PyQt5 import QtCore, QtGui, QtWidgets
+
+from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread,
+                          QThreadPool, pyqtSignal)
+
 import time
 
 """
@@ -52,8 +55,52 @@ event.value
 
 
 # Main class for reading the xbox controller values
-class XboxController(QtCore.QThread):
+class XboxController(QThread):
     # internal ids for the xbox controls
+
+    # setup xbox controller class
+    def __init__(self,
+                 controllerCallBack=None,
+                 joystickNo=0,
+                 deadzone=0.1,
+                 scale=1,
+                 invertYAxis=False):
+
+        # setup threading
+        QThread.__init__(self)
+
+        # persist values
+        self.running = False
+        self.controllerCallBack = controllerCallBack
+        self.joystickNo = joystickNo
+        self.lowerDeadzone = deadzone * -1
+        self.upperDeadzone = deadzone
+        self.scale = scale
+        self.invertYAxis = invertYAxis
+        self.controlCallbacks = {}
+
+        # setup controller properties
+        self.controlValues = {self.XboxControls.LTHUMBX: 0,
+                              self.XboxControls.LTHUMBY: 0,
+                              self.XboxControls.RTHUMBX: 0,
+                              self.XboxControls.RTHUMBY: 0,
+                              self.XboxControls.RTRIGGER: 0,
+                              self.XboxControls.LTRIGGER: 0,
+                              self.XboxControls.A: 0,
+                              self.XboxControls.B: 0,
+                              self.XboxControls.X: 0,
+                              self.XboxControls.Y: 0,
+                              self.XboxControls.LB: 0,
+                              self.XboxControls.RB: 0,
+                              self.XboxControls.BACK: 0,
+                              self.XboxControls.START: 0,
+                              self.XboxControls.XBOX: 0,
+                              self.XboxControls.LEFTTHUMB: 0,
+                              self.XboxControls.RIGHTTHUMB: 0,
+                              self.XboxControls.DPAD: (0, 0)}
+
+        # setup pygame
+        self._setupPygame(joystickNo)
 
     class XboxControls():
         LTHUMBX = 0
@@ -121,123 +168,6 @@ class XboxController(QtCore.QThread):
                         PyGameButtons.LEFTTHUMB: XboxControls.LEFTTHUMB,
                         PyGameButtons.RIGHTTHUMB: XboxControls.RIGHTTHUMB}
 
-    # setup xbox controller class
-    def __init__(self,
-                 controllerCallBack=None,
-                 joystickNo=0,
-                 deadzone=0.1,
-                 scale=1,
-                 invertYAxis=False):
-
-        # setup threading
-        QtCore.QThread.__init__(self)
-
-        # persist values
-        self.running = False
-        self.controllerCallBack = controllerCallBack
-        self.joystickNo = joystickNo
-        self.lowerDeadzone = deadzone * -1
-        self.upperDeadzone = deadzone
-        self.scale = scale
-        self.invertYAxis = invertYAxis
-        self.controlCallbacks = {}
-
-        # setup controller properties
-        self.controlValues = {self.XboxControls.LTHUMBX: 0,
-                              self.XboxControls.LTHUMBY: 0,
-                              self.XboxControls.RTHUMBX: 0,
-                              self.XboxControls.RTHUMBY: 0,
-                              self.XboxControls.RTRIGGER: 0,
-                              self.XboxControls.LTRIGGER: 0,
-                              self.XboxControls.A: 0,
-                              self.XboxControls.B: 0,
-                              self.XboxControls.X: 0,
-                              self.XboxControls.Y: 0,
-                              self.XboxControls.LB: 0,
-                              self.XboxControls.RB: 0,
-                              self.XboxControls.BACK: 0,
-                              self.XboxControls.START: 0,
-                              self.XboxControls.XBOX: 0,
-                              self.XboxControls.LEFTTHUMB: 0,
-                              self.XboxControls.RIGHTTHUMB: 0,
-                              self.XboxControls.DPAD: (0, 0)}
-
-        # setup pygame
-        self._setupPygame(joystickNo)
-
-    # Create controller properties
-    @property
-    def LTHUMBX(self):
-        return self.controlValues[self.XboxControls.LTHUMBX]
-
-    @property
-    def LTHUMBY(self):
-        return self.controlValues[self.XboxControls.LTHUMBY]
-
-    @property
-    def RTHUMBX(self):
-        return self.controlValues[self.XboxControls.RTHUMBX]
-
-    @property
-    def RTHUMBY(self):
-        return self.controlValues[self.XboxControls.RTHUMBY]
-
-    @property
-    def RTRIGGER(self):
-        return self.controlValues[self.XboxControls.RTRIGGER]
-
-    @property
-    def LTRIGGER(self):
-        return self.controlValues[self.XboxControls.LTRIGGER]
-
-    @property
-    def A(self):
-        return self.controlValues[self.XboxControls.A]
-
-    @property
-    def B(self):
-        return self.controlValues[self.XboxControls.B]
-
-    @property
-    def X(self):
-        return self.controlValues[self.XboxControls.X]
-
-    @property
-    def Y(self):
-        return self.controlValues[self.XboxControls.Y]
-
-    @property
-    def LB(self):
-        return self.controlValues[self.XboxControls.LB]
-
-    @property
-    def RB(self):
-        return self.controlValues[self.XboxControls.RB]
-
-    @property
-    def BACK(self):
-        return self.controlValues[self.XboxControls.BACK]
-
-    @property
-    def START(self):
-        return self.controlValues[self.XboxControls.START]
-
-    @property
-    def XBOX(self):
-        return self.controlValues[self.XboxControls.XBOX]
-
-    @property
-    def LEFTTHUMB(self):
-        return self.controlValues[self.XboxControls.LEFTTHUMB]
-
-    @property
-    def RIGHTTHUMB(self):
-        return self.controlValues[self.XboxControls.RIGHTTHUMB]
-
-    @property
-    def DPAD(self):
-        return self.controlValues[self.XboxControls.DPAD]
-
     # setup pygame
     def _setupPygame(self, joystickNo):
         # set SDL to use the dummy NULL video driver, so it doesn't need a windowing system.
@@ -257,6 +187,9 @@ class XboxController(QtCore.QThread):
 
     # called by the thread
     def run(self):
+
+        app = QCoreApplication.instance()
+
         self._start()
 
     # start the controller

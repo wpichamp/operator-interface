@@ -1,5 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread,
+                          QThreadPool, pyqtSignal)
 from core.qt.gui_view import Ui_gui_view
 from core.oi.xbox import XboxController
 
@@ -14,12 +16,13 @@ class GUI_controller(Ui_gui_view):
         # Set up gamepad callback functions
         self.gamepad.setupControlCallback(gamepad.XboxControls.RTHUMBY, self.set_all_extruders)
 
-
         # Set up event handlers for UI boundary entities
         self.leftExtruder1_verticalSlider.valueChanged.connect(self.thing)
         self.leftExtruder2_verticalSlider.valueChanged.connect(self.thing)
 
         self.notEditing = True
+
+        QThreadPool.globalInstance(self).start(gp)
 
     def set_all_extruders(self, value):
 
@@ -51,12 +54,13 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     dialog = QtWidgets.QDialog()
 
-    gamepad = XboxController(None, deadzone=10, scale=100, invertYAxis=True)
+    gp = XboxController(None, deadzone=10, scale=100, invertYAxis=True)
 
-    gui_controller = GUI_controller(dialog, gamepad)
 
-    gamepad.finished.connect(app.exit)
-    gamepad.start()
+
+    gui_controller = GUI_controller(dialog, gp)
+
+
 
     dialog.show()
     sys.exit(app.exec_())
