@@ -13,54 +13,54 @@ class GUI_controller(Ui_gui_view):
 
         self.gamepad = gamepad
 
-        # Set up gamepad callback functions
-        self.gamepad.setupControlCallback(gamepad.XboxControls.RTHUMBY, self.set_all_extruders)
+        controls_to_sliders = {
+            gamepad.XboxControls.RTHUMBY: self.rightStickY_verticalSlider,
+            gamepad.XboxControls.RTHUMBX: self.rightStickX_verticalSlider,
+            gamepad.XboxControls.LTHUMBY: self.leftStickY_verticalSlider,
+            gamepad.XboxControls.LTHUMBX: self.leftStickX_verticalSlider,
+            gamepad.XboxControls.TRIGGER: self.leftTrigger_verticalSlide
+        }
 
-        # Set up event handlers for UI boundary entities
-        self.leftExtruder1_verticalSlider.valueChanged.connect(self.thing)
-        self.leftExtruder2_verticalSlider.valueChanged.connect(self.thing)
+        controls_to_buttons = {
+            gamepad.XboxControls.A: self.a_pushButton,
+            gamepad.XboxControls.B: self.b_pushButton,
+            gamepad.XboxControls.X: self.x_pushButton,
+            gamepad.XboxControls.Y: self.y_pushButton,
+            gamepad.XboxControls.RB: self.rightBumper_pushButton,
+            gamepad.XboxControls.LB: self.leftBumper_pushButton,
+            gamepad.XboxControls.LEFTTHUMB: self.leftStrick_pushButton,
+            gamepad.XboxControls.RIGHTTHUMB: self.rightStick_pushButton,
+            gamepad.XboxControls.START: self.start_pushButton,
+            gamepad.XboxControls.BACK: self.back_pushButton,
+        }
 
-        self.notEditing = True
+        for gamepad_signal in controls_to_sliders.keys():
+            self.connect_gamepad_signal(gamepad_signal, self.setSlider(controls_to_sliders[gamepad_signal]))
 
-        QThreadPool.globalInstance(self).start(gp)
+        for gamepad_signal in controls_to_buttons.keys():
+            self.connect_gamepad_signal(gamepad_signal, self.setButton(controls_to_buttons[gamepad_signal]))
 
-    def set_all_extruders(self, value):
+    def setSlider(self, slider):
+        return lambda value: slider.setValue(value)
 
-        if self.notEditing:
-            self.notEditing = False
+    def setButton(self, button):
+        return lambda value: button.setFlat(value)
 
-            value1 = int(value)
-            value2 = int(value) * -1
+    def connect_gamepad_signal(self, source, function):
+        self.gamepad.signals[source].connect(function)
 
-            print("Setting Extruders to: " + str(value1) + ", " + str(value2))
 
-            self.leftExtruder1_verticalSlider.setValue(value1)
-            self.leftExtruder2_verticalSlider.setValue(value2)
-
-            """
-            self.middleExtruder1_verticalSlider.setValue(value1)
-            self.middleExtruder2_verticalSlider.setValue(value2)
-            self.rightExtruder1_verticalSlider.setValue(value1)
-            self.rightExtruder2_verticalSlider.setValue(value2)
-            """
-
-            self.notEditing = True
-
-    def thing(self):
-        pass
 
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     dialog = QtWidgets.QDialog()
 
-    gp = XboxController(None, deadzone=10, scale=100, invertYAxis=True)
+    gamepad_thread = XboxController(None, deadzone=10, scale=100, invertYAxis=True)
 
+    gui_controller = GUI_controller(dialog, gamepad_thread)
 
-
-    gui_controller = GUI_controller(dialog, gp)
-
-
+    gamepad_thread.start()
 
     dialog.show()
     sys.exit(app.exec_())
