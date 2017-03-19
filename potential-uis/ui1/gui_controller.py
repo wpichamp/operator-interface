@@ -5,6 +5,7 @@ from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread, QThread
 
 from gui import Ui_gui
 
+
 class Loop(QThread):
 
     signal = pyqtSignal(str)
@@ -68,25 +69,52 @@ class GUI_controller(Ui_gui):
             self.link_values(control_group)
 
         delayed_links = [
-            
+            (self.wpp_target_upper_verticalSlider, self.wpp_actual_upper_verticalSlider),
+            (self.spp_target_upper_verticalSlider, self.spp_actual_upper_verticalSlider),
+            (self.xpp_target_upper_verticalSlider, self.xpp_actual_upper_verticalSlider),
+            (self.og_target_angle_dial, self.og_actual_angle_dial),
+            (self.gg_target_angle_dial, self.gg_actual_angle_dial)
         ]
 
-        self.delayed_value_link(self.wpp_target_upper_verticalSlider, self.wpp_actual_upper_verticalSlider)
-        self.delayed_value_link(self.spp_target_upper_verticalSlider, self.spp_actual_upper_verticalSlider)
-        self.delayed_value_link(self.xpp_target_upper_verticalSlider, self.xpp_actual_upper_verticalSlider)
-        self.delayed_value_link(self.og_target_angle_dial, self.og_actual_angle_dial)
-        self.delayed_value_link(self.gg_target_angle_dial, self.gg_actual_angle_dial)
+        for link in delayed_links:
+            self.delayed_value_link(link)
 
-        self.threads = []
 
-    def delayed_value_link(self, object1, object2):
-        object1.valueChanged.connect(lambda value: self.launch_delay(object2, value))
+        self.tableWidget.setColumnCount(4)
+
+        self.btn_sell = QtWidgets.QPushButton('Edit')
+        self.tableWidget.insertRow(0)
+        self.tableWidget.setCellWidget(0, 0, self.btn_sell)
+
+        """
+        self.debug_layout = QtWidgets.QGridLayout()
+
+        self.debug_widget = QtWidgets.QWidget()
+        self.debug_widget.setLayout(self.debug_layout)
+
+        self.debug_scrollArea.setWidget(self.debug_widget)
+
+        for x in range(100):
+            button = QtWidgets.QPushButton("Button " + str(x))
+
+            y_location = 10+(x*20)
+
+            print(y_location)
+
+            button.setGeometry(QtCore.QRect(10, y_location, 70, 20))
+            self.debug_layout.addChildWidget(button)
+        """
+
+
+
+
+    def delayed_value_link(self, tuple):
+        tuple[0].valueChanged.connect(lambda value: self.launch_delay(tuple[1], value))
 
     def launch_delay(self, target, value):
-        dt = DelayThread(value)
-        self.threads.append(dt) # so it doesn't get garbage collected know what i'm sayin
-        dt.signal.connect(target.setValue)
-        dt.start()
+        self.delay_thread = DelayThread(value)
+        self.delay_thread.signal.connect(target.setValue)
+        self.delay_thread.start()
 
     def link_values(self, args):
         for arg1 in args:

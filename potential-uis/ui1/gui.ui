@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -312,7 +312,7 @@
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>171</width>
+       <width>179</width>
        <height>351</height>
       </rect>
      </property>
@@ -912,18 +912,37 @@ Angle</string>
     <attribute name="title">
      <string>Debug</string>
     </attribute>
-    <widget class="QLabel" name="label_8">
+    <widget class="QScrollArea" name="debug_scrollArea">
      <property name="geometry">
       <rect>
-       <x>80</x>
-       <y>60</y>
-       <width>221</width>
-       <height>41</height>
+       <x>10</x>
+       <y>10</y>
+       <width>1</width>
+       <height>1</height>
       </rect>
      </property>
-     <property name="text">
-      <string>List of all possible actions that can be done 
- with buttons associated with them</string>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>16</width>
+        <height>16</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>441</width>
+       <height>441</height>
+      </rect>
      </property>
     </widget>
    </widget>
