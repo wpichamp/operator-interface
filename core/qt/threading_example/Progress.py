@@ -4,7 +4,7 @@ from PyQt5.QtCore import pyqtSlot
 
 class ProgressBar_Dialog(QDialog):
     def __init__(self):
-        super(ProgressBar_Dialog ,self).__init__()
+        super(ProgressBar_Dialog, self).__init__()
         self.init_ui()
 
     def init_ui(self):
