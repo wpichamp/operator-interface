@@ -6,6 +6,23 @@ from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread, QThread
 from gui import Ui_gui
 
 
+class RobotAction(object):
+
+    def __init__(self, name, takes_input=False):
+        self.name = name
+        self.takes_input = takes_input
+        self.user_input = None
+
+    def set_input(self, user_input):
+        self.user_input = user_input
+
+    def callback(self):
+        print("You called: " + self.name)
+
+        if self.user_input is not None:
+            print("User input: " + self.user_input.text())
+
+
 class Loop(QThread):
 
     signal = pyqtSignal(str)
@@ -41,7 +58,7 @@ class DelayThread(QThread):
         self.signal.emit(self.value)
 
 
-class GUI_controller(Ui_gui):
+class Controller(Ui_gui):
 
     def __init__(self, dialog):
         Ui_gui.__init__(self)
@@ -77,39 +94,49 @@ class GUI_controller(Ui_gui):
         ]
 
         for link in delayed_links:
-            self.delayed_value_link(link)
+            source = link[0]
+            target = link[1]
+            self.delayed_value_link(source, target)
+
+        self.robot_actions = [
+            RobotAction("Set WPP", True),
+            RobotAction("Rotate Grippers", True),
+            RobotAction("Toggle Orange Grip")
+        ]
+
+        self.init_debug_table()
+
+    def init_debug_table(self):
+
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setHorizontalHeaderLabels(["Command", "Input"])
+
+        for action in self.robot_actions:
+
+            target_row = self.tableWidget.rowCount()
+            self.tableWidget.insertRow(target_row)
+
+            column_count = 0
+
+            action_button = QtWidgets.QPushButton(action.name)
+            self.tableWidget.setCellWidget(target_row, column_count, action_button)
+
+            column_count += 1
+
+            if action.takes_input:
+                user_input = QtWidgets.QLineEdit()
+                self.tableWidget.setCellWidget(target_row, column_count, user_input)
+                action.set_input(user_input)
+            else:
+                user_input = QtWidgets.QLabel("NONE")
+                user_input.setAlignment(QtCore.Qt.AlignCenter)
+                self.tableWidget.setCellWidget(target_row, column_count, user_input)
+
+            action_button.clicked.connect(action.callback)
 
 
-        self.tableWidget.setColumnCount(4)
-
-        self.btn_sell = QtWidgets.QPushButton('Edit')
-        self.tableWidget.insertRow(0)
-        self.tableWidget.setCellWidget(0, 0, self.btn_sell)
-
-        """
-        self.debug_layout = QtWidgets.QGridLayout()
-
-        self.debug_widget = QtWidgets.QWidget()
-        self.debug_widget.setLayout(self.debug_layout)
-
-        self.debug_scrollArea.setWidget(self.debug_widget)
-
-        for x in range(100):
-            button = QtWidgets.QPushButton("Button " + str(x))
-
-            y_location = 10+(x*20)
-
-            print(y_location)
-
-            button.setGeometry(QtCore.QRect(10, y_location, 70, 20))
-            self.debug_layout.addChildWidget(button)
-        """
-
-
-
-
-    def delayed_value_link(self, tuple):
-        tuple[0].valueChanged.connect(lambda value: self.launch_delay(tuple[1], value))
+    def delayed_value_link(self, source, target):
+        source.valueChanged.connect(lambda value: self.launch_delay(target, value))
 
     def launch_delay(self, target, value):
         self.delay_thread = DelayThread(value)
@@ -133,7 +160,7 @@ if __name__ == '__main__':
 
     loop = Loop()
 
-    gui_controller = GUI_controller(dialog)
+    gui_controller = Controller(dialog)
 
     gui_controller.make_connection(loop)
 
