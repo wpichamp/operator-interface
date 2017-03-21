@@ -1,9 +1,8 @@
 import sys
 from time import sleep
+from core.gui.gui_base import Ui_gui
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread, QThreadPool, pyqtSignal)
-
-from gui import Ui_gui
 
 
 class RobotAction(object):
@@ -64,25 +63,25 @@ class Controller(Ui_gui):
         Ui_gui.__init__(self)
         self.setupUi(dialog)  # from super
 
-        pp_controls = [
+        loop = Loop()
+        self.make_connection(loop)
+        loop.start()
+
+        linked_controls = [
             [self.wpp_target_upper_verticalSlider, self.wpp_target_lower_verticalSlider, self.wpp_target_spinBox],
             [self.wpp_actual_upper_verticalSlider, self.wpp_actual_lower_verticalSlider, self.wpp_actual_spinBox],
             [self.spp_target_upper_verticalSlider, self.spp_target_lower_verticalSlider, self.spp_target_spinBox],
             [self.spp_actual_upper_verticalSlider, self.spp_actual_lower_verticalSlider, self.spp_actual_spinBox],
             [self.xpp_target_upper_verticalSlider, self.xpp_target_lower_verticalSlider, self.xpp_target_spinBox],
-            [self.xpp_actual_upper_verticalSlider, self.xpp_actual_lower_verticalSlider, self.xpp_actual_spinBox]
-        ]
-
-        gripper_controls = [
+            [self.xpp_actual_upper_verticalSlider, self.xpp_actual_lower_verticalSlider, self.xpp_actual_spinBox],
             [self.og_target_angle_dial, self.og_target_angle_spinbox],
             [self.gg_target_angle_dial, self.gg_target_angle_spinbox],
             [self.og_actual_angle_dial, self.og_actual_angle_spinbox],
-            [self.gg_actual_angle_dial, self.gg_actual_angle_spinbox]
+            [self.gg_actual_angle_dial, self.gg_actual_angle_spinbox],
+            [self.speedfactor_horizontalSlider, self.speedfactor_spinBox]
         ]
 
-        all_controls = pp_controls + gripper_controls
-
-        for control_group in all_controls:
+        for control_group in linked_controls:
             self.link_values(control_group)
 
         delayed_links = [
@@ -134,7 +133,6 @@ class Controller(Ui_gui):
 
             action_button.clicked.connect(action.callback)
 
-
     def delayed_value_link(self, source, target):
         source.valueChanged.connect(lambda value: self.launch_delay(target, value))
 
@@ -158,13 +156,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     dialog = QtWidgets.QDialog()
 
-    loop = Loop()
-
     gui_controller = Controller(dialog)
-
-    gui_controller.make_connection(loop)
-
-    loop.start()
 
     dialog.show()
     sys.exit(app.exec_())
