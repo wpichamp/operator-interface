@@ -3,24 +3,7 @@ from time import sleep
 from core.gui.gui_base import Ui_gui
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread, QThreadPool, pyqtSignal)
-
-
-class RobotAction(object):
-
-    def __init__(self, name, takes_input=False):
-        self.name = name
-        self.takes_input = takes_input
-        self.user_input = None
-
-    def set_input(self, user_input):
-        self.user_input = user_input
-
-    def callback(self):
-        print("You called: " + self.name)
-
-        if self.user_input is not None:
-            print("User input: " + self.user_input.text())
-
+from functools import partial
 
 class Loop(QThread):
 
@@ -59,7 +42,7 @@ class DelayThread(QThread):
 
 class Controller(Ui_gui):
 
-    def __init__(self, dialog):
+    def __init__(self, dialog, robot_actions):
         Ui_gui.__init__(self)
         self.setupUi(dialog)  # from super
 
@@ -97,11 +80,7 @@ class Controller(Ui_gui):
             target = link[1]
             self.delayed_value_link(source, target)
 
-        self.robot_actions = [
-            RobotAction("Set WPP", True),
-            RobotAction("Rotate Grippers", True),
-            RobotAction("Toggle Orange Grip")
-        ]
+        self.robot_actions = robot_actions
 
         self.init_debug_table()
 
@@ -115,23 +94,18 @@ class Controller(Ui_gui):
             target_row = self.tableWidget.rowCount()
             self.tableWidget.insertRow(target_row)
 
-            column_count = 0
-
             action_button = QtWidgets.QPushButton(action.name)
-            self.tableWidget.setCellWidget(target_row, column_count, action_button)
-
-            column_count += 1
+            self.tableWidget.setCellWidget(target_row, 0, action_button)
 
             if action.takes_input:
                 user_input = QtWidgets.QLineEdit()
-                self.tableWidget.setCellWidget(target_row, column_count, user_input)
-                action.set_input(user_input)
+                self.tableWidget.setCellWidget(target_row, 1, user_input)
             else:
                 user_input = QtWidgets.QLabel("NONE")
                 user_input.setAlignment(QtCore.Qt.AlignCenter)
-                self.tableWidget.setCellWidget(target_row, column_count, user_input)
+                self.tableWidget.setCellWidget(target_row, 1, user_input)
 
-            action_button.clicked.connect(action.callback)
+            action_button.clicked.connect(partial(action.callback, user_input))
 
     def delayed_value_link(self, source, target):
         source.valueChanged.connect(lambda value: self.launch_delay(target, value))
