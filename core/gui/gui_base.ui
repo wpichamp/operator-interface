@@ -374,7 +374,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_7">
+               <widget class="QPushButton" name="toggle_og_pushButton">
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>

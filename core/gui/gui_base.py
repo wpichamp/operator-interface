@@ -156,12 +156,12 @@ class Ui_gui(object):
         self.label_16.setAlignment(QtCore.Qt.AlignCenter)
         self.label_16.setObjectName("label_16")
         self.verticalLayout_3.addWidget(self.label_16)
-        self.pushButton_7 = QtWidgets.QPushButton(self.layoutWidget2)
+        self.toggle_og_pushButton = QtWidgets.QPushButton(self.layoutWidget2)
         font = QtGui.QFont()
         font.setPointSize(12)
-        self.pushButton_7.setFont(font)
-        self.pushButton_7.setObjectName("pushButton_7")
-        self.verticalLayout_3.addWidget(self.pushButton_7)
+        self.toggle_og_pushButton.setFont(font)
+        self.toggle_og_pushButton.setObjectName("toggle_og_pushButton")
+        self.verticalLayout_3.addWidget(self.toggle_og_pushButton)
         self.verticalLayout_7.addLayout(self.verticalLayout_3)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
@@ -454,7 +454,7 @@ class Ui_gui(object):
         self.debug_scrollArea.setWidgetResizable(True)
         self.debug_scrollArea.setObjectName("debug_scrollArea")
         self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 98, 28))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 16, 16))
         self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
         self.debug_scrollArea.setWidget(self.scrollAreaWidgetContents_2)
         self.layoutWidget4 = QtWidgets.QWidget(self.tab_3)
@@ -618,7 +618,7 @@ class Ui_gui(object):
         self.horizontalLayout_11.addWidget(self.pushButton_2)
 
         self.retranslateUi(gui)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(gui)
 
     def retranslateUi(self, gui):
@@ -645,7 +645,7 @@ class Ui_gui(object):
         self.checkBox_10.setText(_translate("gui", "CheckBox"))
         self.label_28.setText(_translate("gui", "Constants"))
         self.label_16.setText(_translate("gui", "Orange Gripper"))
-        self.pushButton_7.setText(_translate("gui", "Toggle Grip"))
+        self.toggle_og_pushButton.setText(_translate("gui", "Toggle Grip"))
         self.label_17.setText(_translate("gui", "Gripper\n"
 "Angle"))
         self.label_10.setText(_translate("gui", "Target"))

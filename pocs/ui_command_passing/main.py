@@ -21,9 +21,6 @@ class MessagePasser(Thread):
     def set_partner_add_to_queue_method(self, method):
         self.add_to_partner = method
 
-    def add_message_to_queue(self, message):
-        self.message_queue.put(message)
-
     def run(self):
         while True:
             message = self.message_queue.get()
@@ -48,24 +45,20 @@ if __name__ == "__main__":
     robot = Robot()
     ui = Ui()
 
-    robot.set_partner_add_to_queue_method(ui.add_message_to_queue)
-    ui.set_partner_add_to_queue_method(robot.add_message_to_queue)
+    robot.set_partner_add_to_queue_method(ui.message_queue.put)
+    ui.set_partner_add_to_queue_method(robot.message_queue.put)
 
     robot.start()
     ui.start()
 
     while True:
 
-        m = Message("Hello")
-
         random_number = randint(0, 10)
 
         if random_number == 5:
-            print("adding to robot")
-            robot.add_to_partner(m)
+            robot.add_to_partner(Message("Hello from robot"))
         elif random_number == 1:
-            print("adding to ui")
-            ui.add_to_partner(m)
+            ui.add_to_partner(Message("Hello from UI"))
         else:
             sleep(.5)
 
