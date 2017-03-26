@@ -47,6 +47,7 @@ class Controller(Ui_gui, MessagePasser):
         Ui_gui.__init__(self)
         MessagePasser.__init__(self)
         self.setupUi(dialog)  # from super
+        self.name = "UI"
 
         linked_controls = [
             [self.wpp_target_upper_verticalSlider, self.wpp_target_lower_verticalSlider, self.wpp_target_spinBox],
@@ -92,7 +93,9 @@ class Controller(Ui_gui, MessagePasser):
 
             self.tableWidget.setCellWidget(target_row, 1, user_input)
 
-
+        self.tableWidget.setVisible(False)
+        self.tableWidget.resizeColumnsToContents()
+        self.tableWidget.setVisible(True)
 
     def link_values(self, args):
         for arg1 in args:

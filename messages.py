@@ -13,7 +13,7 @@ class Message(object):
         :param value:
         :return:
         """
-        
+
         try:
             value = int(value)
         except ValueError as e:
