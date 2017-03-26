@@ -22,6 +22,8 @@ class MessagePasser(Thread):
         while True:
             message = self.message_queue.get()
             print("In [" + self.name + "] Message: " + message.name)
+            if message.takes_input:
+                print("Payload: " + str(message.value))
 
 
 

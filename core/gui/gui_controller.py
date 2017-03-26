@@ -84,13 +84,15 @@ class Controller(Ui_gui, MessagePasser):
 
             if robot_command.takes_input:
                 user_input = QtWidgets.QLineEdit()
+                action_button.clicked.connect(lambda state, r=robot_command, i=user_input: self.add_to_partner(r.set_value(i.text())))
             else:
                 user_input = QtWidgets.QLabel("NONE")
                 user_input.setAlignment(QtCore.Qt.AlignCenter)
+                action_button.clicked.connect(lambda state, r=robot_command: self.add_to_partner(r))
 
             self.tableWidget.setCellWidget(target_row, 1, user_input)
 
-            action_button.clicked.connect(lambda state, robot_command=robot_command: self.add_to_partner(robot_command))
+
 
     def link_values(self, args):
         for arg1 in args:
