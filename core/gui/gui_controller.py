@@ -6,44 +6,10 @@ from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread, QThread
 from core.message_passing import MessagePasser
 from functools import partial
 
-class Loop(QThread):
-
-    signal = pyqtSignal(str)
-
-    def __init__(self):
-        QThread.__init__(self)
-
-    def run(self):
-        count = 0
-        while True:
-
-            if count % 10:
-                self.signal.emit("[Debug Message]: " + str(count))
-            else:
-                self.signal.emit("[Error Message]: " + str(count))
-
-            count += 1
-            if count > 100:
-                count = 0
-            sleep(.5)
-
-
-class DelayThread(QThread):
-
-    signal = pyqtSignal(int)
-
-    def __init__(self, value):
-        QThread.__init__(self)
-        self.value = value
-
-    def run(self):
-        sleep(.2)
-        self.signal.emit(self.value)
-
 
 class Controller(Ui_gui, MessagePasser):
 
-    def __init__(self, dialog, robot_commands):
+    def __init__(self, dialog, commands_container):
         Ui_gui.__init__(self)
         MessagePasser.__init__(self)
         self.setupUi(dialog)  # from super
@@ -66,16 +32,31 @@ class Controller(Ui_gui, MessagePasser):
         for control_group in linked_controls:
             self.link_values(control_group)
 
-        self.robot_commands = list(robot_commands)
+        self.commands_container = commands_container
 
         self.init_debug_table()
+
+        self.send_toggle_button(self.toggle_og_pushButton, self.commands_container.grip_orange_gripper)
+        self.send_toggle_button(self.toggle_gg_pushButton, self.commands_container.grip_green_gripper)
+
+        pairs = [
+            [self.wpp_target_upper_verticalSlider, self.commands_container.set_w_pp_extension],
+            [self.spp_target_upper_verticalSlider, self.commands_container.set_s_pp_extension],
+            [self.xpp_target_upper_verticalSlider, self.commands_container.set_x_pp_extension],
+            [self.xpp_target_upper_verticalSlider, self.commands_container.set_x_pp_extension],
+            [self.og_target_angle_dial, self.commands_container.rotate_orange_gripper],
+            [self.gg_target_angle_dial, self.commands_container.rotate_green_gripper],
+        ]
+
+        for pair in pairs:
+            self.thing(pair[0], pair[1])
 
     def init_debug_table(self):
 
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setHorizontalHeaderLabels(["Command", "Input"])
 
-        for robot_command in self.robot_commands:
+        for robot_command in self.commands_container.command_list:
 
             target_row = self.tableWidget.rowCount()
             self.tableWidget.insertRow(target_row)
@@ -102,6 +83,27 @@ class Controller(Ui_gui, MessagePasser):
             for arg2 in args:
                 arg1.valueChanged.connect(arg2.setValue)
 
+    def run(self):
+        while True:
+            message = self.message_queue.get()
+            print("In [" + self.name + "] Message: " + message.name)
+            if message.takes_input:
+                print("Payload: " + str(message.value))
+
+    def send_toggle_button(self, button, command):
+        call_me = lambda state, c=command: (
+            button.setStyleSheet("QPushButton{color:firebrick;}"),
+            button.setEnabled(False),
+            self.add_to_partner(c)
+        )
+        button.clicked.connect(call_me)
+
+    def thing(self, value_emitter, command):
+        call_me = lambda value, c=command: (
+            c.set_value(value),
+            self.add_to_partner(c)
+        )
+        value_emitter.valueChanged.connect(call_me)
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

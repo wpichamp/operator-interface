@@ -23,14 +23,28 @@ class Message(object):
         return self  # very important for automatic operation generation
 
 
-commands = [
-    Message("Rotate Orange Gripper", True),
-    Message("Rotate Green Gripper", True),
-    Message("Set W PP Extension", True),
-    Message("Set S PP Extension", True),
-    Message("Set X PP Extension", True),
-    Message("Send Bytes To Bus", True),
-    Message("Grip Orange Gripper"),
-    Message("Grip Green Gripper"),
-    Message("Send Bytes To Payload", True)
-]
+class CommandClass(object):
+
+    rotate_orange_gripper = Message("Rotate Orange Gripper", True)
+    rotate_green_gripper = Message("Rotate Green Gripper", True)
+    set_w_pp_extension = Message("Set W PP Extension", True)
+    set_s_pp_extension = Message("Set S PP Extension", True)
+    set_x_pp_extension = Message("Set X PP Extension", True)
+    send_bytes_to_bus = Message("Send Bytes To Bus", True)
+    grip_orange_gripper = Message("Grip Orange Gripper")
+    grip_green_gripper = Message("Grip Green Gripper")
+    send_bytes_to_payload = Message("Send Bytes To Payload", True)
+
+    command_list = [
+        rotate_orange_gripper,
+        rotate_green_gripper,
+        set_w_pp_extension,
+        set_s_pp_extension,
+        set_x_pp_extension,
+        send_bytes_to_bus,
+        grip_green_gripper,
+        grip_orange_gripper,
+        send_bytes_to_payload
+    ]
+
+command_container = CommandClass()

@@ -475,7 +475,7 @@ Angle</string>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_8">
+           <widget class="QPushButton" name="toggle_gg_pushButton">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
@@ -560,9 +560,9 @@ Angle</string>
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>190</x>
+       <x>200</x>
        <y>10</y>
-       <width>280</width>
+       <width>261</width>
        <height>351</height>
       </rect>
      </property>

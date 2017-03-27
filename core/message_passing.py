@@ -4,6 +4,7 @@ from random import randint
 from time import sleep
 from messages import Message
 
+
 class MessagePasser(Thread):
 
     def __init__(self):
